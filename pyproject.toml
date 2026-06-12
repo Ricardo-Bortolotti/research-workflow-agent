@@ -28,7 +28,9 @@ dependencies = [
     # Config & inference
     "python-dotenv>=1.0.0",
     "huggingface-hub>=0.26.0",
+    "httpx>=0.27.0",
     "ipykernel>=7.3.0",
+    "python-multipart>=0.0.9",
 ]
 
 [dependency-groups]
@@ -41,7 +43,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["app", "agents", "graph", "rag"]
+packages = ["app", "agents", "api", "graph", "rag"]
 
 [tool.ruff]
 target-version = "py311"

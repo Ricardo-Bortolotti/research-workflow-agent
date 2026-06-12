@@ -17,6 +17,35 @@ cp .env.example .env
 # Edit .env with your Hugging Face API token
 ```
 
+## Run the API
+
+```bash
+uv run uvicorn app.main:app --reload
+```
+
+API docs: http://localhost:8000/docs
+
+### Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/upload` | Upload a PDF |
+| `POST` | `/analyze` | Index document + run agent workflow |
+| `GET` | `/results/{analysis_id}` | Fetch structured results |
+| `GET` | `/health` | Health check |
+
+## Run Streamlit UI
+
+```bash
+# Terminal 1 — API
+uv run uvicorn app.main:app --reload
+
+# Terminal 2 — UI
+uv run streamlit run ui/streamlit_app.py
+```
+
+Set `API_URL` in `.env` if the API is not on `http://localhost:8000`.
+
 ## Manual tests
 
 ```bash
@@ -26,13 +55,14 @@ uv run pytest -v
 
 ## Notebooks
 
-- `notebooks/01_test_rag_pipeline.ipynb` — Index PDF and run similarity search
-- `notebooks/02_test_llm.ipynb` — Test Hugging Face LLM
-- `notebooks/03_test_summary_agent.ipynb` — Full RAG + Summary Agent
-- `notebooks/04_test_concept_agent.ipynb` — Full RAG + Concept Agent (structured JSON)
-- `notebooks/05_test_quiz_agent.ipynb` — Full RAG + Quiz Agent
-- `notebooks/06_test_flashcard_agent.ipynb` — Full RAG + Flashcard Agent
-- `notebooks/07_test_mindmap_agent.ipynb` — Full RAG + Mind Map Agent
+- `01_test_rag_pipeline.ipynb` — Index PDF and similarity search
+- `02_test_llm.ipynb` — Hugging Face LLM
+- `03_test_summary_agent.ipynb` — Summary Agent
+- `04_test_concept_agent.ipynb` — Concept Agent
+- `05_test_quiz_agent.ipynb` — Quiz Agent
+- `06_test_flashcard_agent.ipynb` — Flashcard Agent
+- `07_test_mindmap_agent.ipynb` — Mind Map Agent
+- `08_test_workflow.ipynb` — Full LangGraph workflow
 
 ## Agent workflow (LangGraph)
 
@@ -48,6 +78,5 @@ retriever = DocumentRetriever(vector_store=store, embedder=ChunkEmbedder())
 context = retriever.invoke("Your question")
 
 result = run_workflow("Your question", context)
-print(result["summary"])
 print(result["mindmap"]["text"])
 ```
