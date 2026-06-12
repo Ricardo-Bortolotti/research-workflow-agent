@@ -1,0 +1,32 @@
+# Virtual environment & caches
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+
+# Git & IDE
+.git/
+.gitignore
+.idea/
+.vscode/
+
+# Local secrets (never bake into images)
+.env
+
+# Runtime data (mounted as volumes in Docker)
+data/raw/*
+data/vector_db/*
+data/metadata/*
+
+# Notebooks & dev-only assets
+notebooks/
+tests/
+scripts/
+
+# Docs not needed at runtime
+*.md
+!README.md

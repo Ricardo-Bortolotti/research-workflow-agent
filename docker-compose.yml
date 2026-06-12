@@ -1,0 +1,44 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: book-research-api
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      PORT: "8000"
+    volumes:
+      - app_data:/app/data
+      - model_cache:/app/.cache
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: book-research-ui
+    ports:
+      - "8501:8501"
+    environment:
+      API_URL: http://api:8000
+    command:
+      - sh
+      - -c
+      - uv run streamlit run ui/streamlit_app.py --server.port=8501 --server.address=0.0.0.0 --browser.gatherUsageStats=false
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  app_data:
+  model_cache:

@@ -17,8 +17,8 @@ with st.sidebar:
     api_url = st.text_input("API URL", value=API_URL)
     top_k = st.slider("Retrieved chunks (top_k)", min_value=1, max_value=20, value=5)
     st.markdown("---")
-    st.markdown("**Run the API first:**")
-    st.code("uv run uvicorn app.main:app --reload", language="bash")
+    st.markdown("**Local run (Docker):**")
+    st.code("docker compose up --build", language="bash")
 
 
 def _api_client() -> httpx.Client:
