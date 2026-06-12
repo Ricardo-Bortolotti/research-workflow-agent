@@ -41,7 +41,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["app", "agents", "rag"]
+packages = ["app", "agents", "graph", "rag"]
 
 [tool.ruff]
 target-version = "py311"

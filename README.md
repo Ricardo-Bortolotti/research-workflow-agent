@@ -33,3 +33,21 @@ uv run pytest -v
 - `notebooks/05_test_quiz_agent.ipynb` — Full RAG + Quiz Agent
 - `notebooks/06_test_flashcard_agent.ipynb` — Full RAG + Flashcard Agent
 - `notebooks/07_test_mindmap_agent.ipynb` — Full RAG + Mind Map Agent
+
+## Agent workflow (LangGraph)
+
+```python
+from graph.workflow import run_workflow
+from rag.embeddings import ChunkEmbedder
+from rag.retriever import DocumentRetriever
+from rag.vectorstore import ChromaVectorStore
+
+store = ChromaVectorStore()
+store.load_collection()
+retriever = DocumentRetriever(vector_store=store, embedder=ChunkEmbedder())
+context = retriever.invoke("Your question")
+
+result = run_workflow("Your question", context)
+print(result["summary"])
+print(result["mindmap"]["text"])
+```
