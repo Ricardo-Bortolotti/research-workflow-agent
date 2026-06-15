@@ -181,9 +181,11 @@ st.markdown(
     """
     <div style="text-align: center; color: #6b7280; font-size: 0.9rem; padding: 1rem 0 2rem;">
         Developed by Ricardo Bortolotti<br>
-        <a href="https://www.linkedin.com/in/ricardo-bortolotti" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        <a href="https://www.linkedin.com/in/ricardo-bortolotti"
+           target="_blank" rel="noopener noreferrer">LinkedIn</a>
         &nbsp;·&nbsp;
-        <a href="https://github.com/Ricardo-Bortolotti" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a href="https://github.com/Ricardo-Bortolotti"
+           target="_blank" rel="noopener noreferrer">GitHub</a>
     </div>
     """,
     unsafe_allow_html=True,
