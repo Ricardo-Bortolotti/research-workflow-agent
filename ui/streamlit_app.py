@@ -6,7 +6,22 @@ import os
 import httpx
 import streamlit as st
 
-API_URL = os.getenv("API_URL", "http://localhost:8000").rstrip("/")
+
+def _default_api_url() -> str:
+    """Resolve API base URL from env (Docker/local) or Streamlit Cloud secrets."""
+    env_url = os.getenv("API_URL")
+    if env_url:
+        return env_url.rstrip("/")
+    try:
+        secret_url = st.secrets.get("API_URL")
+        if secret_url:
+            return str(secret_url).rstrip("/")
+    except (FileNotFoundError, KeyError, AttributeError):
+        pass
+    return "http://localhost:8000"
+
+
+API_URL = _default_api_url()
 
 st.set_page_config(page_title="Book Research Agent", page_icon="📚", layout="wide")
 st.title("Book Research Agent")
