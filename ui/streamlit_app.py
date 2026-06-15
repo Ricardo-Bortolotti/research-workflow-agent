@@ -22,32 +22,61 @@ def _default_api_url() -> str:
 
 
 API_URL = _default_api_url()
+DEFAULT_TOP_K = 5
 
-st.set_page_config(page_title="Book Research Agent", page_icon="📚", layout="wide")
+st.set_page_config(
+    page_title="Book Research Agent",
+    page_icon="📚",
+    layout="wide",
+    initial_sidebar_state="collapsed",
+)
+
+st.markdown(
+    """
+    <style>
+        section[data-testid="stSidebar"] { display: none; }
+        [data-testid="collapsedControl"] { display: none; }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 st.title("Book Research Agent")
 st.caption("Upload a PDF, run the agent workflow, and explore structured study materials.")
 
-with st.sidebar:
-    st.header("Settings")
-    api_url = st.text_input("API URL", value=API_URL)
-    top_k = st.slider("Retrieved chunks (top_k)", min_value=1, max_value=20, value=5)
-    st.markdown("---")
-    st.markdown("**Local run (Docker):**")
-    st.code("docker compose up --build", language="bash")
-
-
-def _api_client() -> httpx.Client:
-    return httpx.Client(base_url=api_url, timeout=600.0)
-
-
+st.markdown(
+    "Choose a PDF to analyze. The document is sent to the API, indexed for semantic search, "
+    "and used as the sole source of context for every agent in the workflow."
+)
 uploaded_file = st.file_uploader("Upload a PDF", type=["pdf"])
+
+st.markdown(
+    "Ask a focused question about the document. The retriever selects the most relevant "
+    "passages for that question, and all agents (summary, concepts, quiz, flashcards, "
+    "and mind map) answer using only that retrieved context."
+)
 question = st.text_area(
     "Research question",
     value="What are the main ideas in this document?",
     height=100,
 )
 
+with st.expander("Retrieval settings"):
+    top_k = st.slider(
+        "Retrieved chunks (top_k)",
+        min_value=1,
+        max_value=20,
+        value=DEFAULT_TOP_K,
+        help="Number of document chunks passed to each agent. Higher values add context "
+        "but increase processing time and API cost.",
+    )
+
 analyze_clicked = st.button("Run analysis", type="primary", disabled=uploaded_file is None)
+
+
+def _api_client() -> httpx.Client:
+    return httpx.Client(base_url=API_URL, timeout=600.0)
+
 
 if analyze_clicked and uploaded_file is not None:
     with st.spinner("Uploading PDF and running agents. This may take several minutes..."):
