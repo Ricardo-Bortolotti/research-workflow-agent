@@ -175,3 +175,16 @@ if results:
 
     with st.expander("Raw JSON response"):
         st.code(json.dumps(results, indent=2), language="json")
+
+st.markdown("---")
+st.markdown(
+    """
+    <div style="text-align: center; color: #6b7280; font-size: 0.9rem; padding: 1rem 0 2rem;">
+        Developed by Ricardo Bortolotti<br>
+        <a href="https://www.linkedin.com/in/ricardo-bortolotti" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        &nbsp;·&nbsp;
+        <a href="https://github.com/Ricardo-Bortolotti" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)

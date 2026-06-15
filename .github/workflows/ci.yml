@@ -27,7 +27,7 @@ jobs:
         run: uv python install 3.11
 
       - name: Install dependencies
-        run: uv sync --frozen --dev
+        run: uv sync --frozen --dev --no-group ui
 
       - name: Ruff check
         run: uv run ruff check app agents api graph rag ui tests
@@ -52,7 +52,7 @@ jobs:
         run: uv python install 3.11
 
       - name: Install dependencies
-        run: uv sync --frozen --dev
+        run: uv sync --frozen --dev --no-group ui
 
       - name: Run unit tests
         run: uv run pytest tests/ -v --tb=short

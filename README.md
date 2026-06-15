@@ -153,8 +153,8 @@ book-research-agent/
 ├── notebooks/        # Interactive exploration notebooks
 ├── scripts/          # Manual test utilities
 ├── Dockerfile          # Slim API image (Railway / production)
-├── Dockerfile.ui       # Lightweight Streamlit image
-├── requirements-ui.txt  # Streamlit Cloud dependencies
+├── Dockerfile.ui       # Lightweight Streamlit image (uv --only-group ui)
+├── docker-compose.yml
 └── pyproject.toml
 ```
 
@@ -174,9 +174,15 @@ book-research-agent/
 git clone https://github.com/Ricardo-Bortolotti/research-workflow-agent.git
 cd research-workflow-agent
 
-uv sync
+uv sync --no-group ui
 cp .env.example .env
 # Edit .env — set HUGGINGFACE_API_TOKEN
+```
+
+For local Streamlit UI:
+
+```bash
+uv sync --group ui
 ```
 
 ### Run locally
@@ -284,8 +290,9 @@ Stop: `docker compose down` · Reset volumes: `docker compose down -v`
 |---------------|-----------|
 | **Separate Docker images** | API ships RAG + agents; UI is a thin HTTP client (~no ML stack) |
 | `Dockerfile` (API) | No Streamlit, no PyTorch — smaller image and lower RAM on Railway |
-| `Dockerfile.ui` | Only `streamlit`, `httpx`, `python-dotenv` via `requirements-ui.txt` |
-| `uv sync --frozen` | Reproducible API installs from `uv.lock` |
+| `Dockerfile.ui` | `uv sync --only-group ui` — Streamlit client only, no RAG stack |
+| `uv sync --frozen` | Reproducible installs from `uv.lock` |
+| `uv.lock` at repo root | Streamlit Community Cloud auto-detects and runs `uv sync` |
 | HF API for embeddings | Same token as LLM; avoids loading PyTorch in the container |
 | Named volume (`app_data`) | Persist uploads, ChromaDB, and results |
 | `API_URL=http://api:8000` in compose | UI container reaches API over Docker network |
@@ -297,7 +304,7 @@ Stop: `docker compose down` · Reset volumes: `docker compose down -v`
 ### Run tests locally
 
 ```bash
-uv sync --dev
+uv sync --dev --no-group ui
 uv run pytest -v
 ```
 
@@ -346,7 +353,7 @@ On every push/PR to `main`, the [CI workflow](.github/workflows/ci.yml) runs:
 
 1. Deploy at [share.streamlit.io](https://share.streamlit.io).
 2. Main file: `ui/streamlit_app.py`
-3. Dependencies: use `requirements-ui.txt` (or set it as the requirements file in app settings)
+3. **Dependencies:** keep `pyproject.toml` + `uv.lock` at the repo root. Streamlit Cloud detects `uv.lock` and runs `uv sync`. Streamlit itself is pre-installed on the platform; `httpx` and `python-dotenv` come from the main project dependencies.
 4. In **Secrets**:
 
    ```toml
