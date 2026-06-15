@@ -1,10 +1,11 @@
 """Tests for RAG document retrieval."""
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from langchain_core.documents import Document
 
+from rag.embeddings import ChunkEmbedder  # Import for patching
 from rag.retriever import DEFAULT_TOP_K, DocumentRetriever, RetrieverError
 
 
@@ -23,6 +24,13 @@ def mock_embedder() -> MagicMock:
     embedder = MagicMock()
     embedder.embed_query.return_value = [0.1, 0.2, 0.3]
     return embedder
+
+
+# Patch ChunkEmbedder for the entire module to prevent real token lookup
+@pytest.fixture(autouse=True)
+def patch_chunk_embedder(mock_embedder: MagicMock) -> None:
+    with patch("rag.retriever.ChunkEmbedder", return_value=mock_embedder):
+        yield
 
 
 @pytest.fixture
