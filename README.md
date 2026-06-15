@@ -6,10 +6,21 @@ AI-powered system that transforms books, articles, and PDFs into structured stud
 
 Upload a PDF, ask a research question, and receive an executive summary, key concepts, quiz questions, flashcards, and a hierarchical mind map — all grounded in retrieved document chunks.
 
+## Live demo
+
+| Service | URL |
+|---------|-----|
+| **Streamlit UI** | [research-workflow-agent.streamlit.app](https://research-workflow-agent-giekafxwvrbkmzllhjlnt2.streamlit.app/) |
+| **API (Railway)** | [research-workflow-agent-production.up.railway.app](https://research-workflow-agent-production.up.railway.app/) |
+| **API docs** | [OpenAPI / Swagger](https://research-workflow-agent-production.up.railway.app/docs) |
+
+The UI uploads PDFs and runs analysis against the Railway API. No Hugging Face token is required in the browser — only on the API service.
+
 ---
 
 ## Table of contents
 
+- [Live demo](#live-demo)
 - [Architecture](#architecture)
 - [Agent workflow (DAG)](#agent-workflow-dag)
 - [Tech stack](#tech-stack)
@@ -209,16 +220,20 @@ Set `API_URL` in `.env` if the API is not on `http://localhost:8000`.
 
 ## API examples
 
+Use the production API base URL or `http://localhost:8000` when running locally.
+
+**Production base URL:** `https://research-workflow-agent-production.up.railway.app`
+
 ### Health check
 
 ```bash
-curl http://localhost:8000/health
+curl https://research-workflow-agent-production.up.railway.app/health
 ```
 
 ### Upload a PDF
 
 ```bash
-curl -X POST http://localhost:8000/upload \
+curl -X POST https://research-workflow-agent-production.up.railway.app/upload \
   -F "file=@sample.pdf"
 ```
 
@@ -226,20 +241,20 @@ Response:
 
 ```json
 {
-  "upload_id": "a1b2c3d4-...",
-  "filename": "sample.pdf",
-  "message": "PDF uploaded successfully"
+  "document_id": "a1b2c3d4-...",
+  "filename": "sample.pdf"
 }
 ```
 
 ### Run analysis
 
 ```bash
-curl -X POST http://localhost:8000/analyze \
+curl -X POST https://research-workflow-agent-production.up.railway.app/analyze \
   -H "Content-Type: application/json" \
   -d '{
-    "upload_id": "a1b2c3d4-...",
-    "question": "What are the key ideas in this document?"
+    "document_id": "a1b2c3d4-...",
+    "question": "What are the key ideas in this document?",
+    "top_k": 5
   }'
 ```
 
@@ -248,6 +263,7 @@ Response:
 ```json
 {
   "analysis_id": "e5f6g7h8-...",
+  "document_id": "a1b2c3d4-...",
   "status": "completed",
   "message": "Analysis completed successfully"
 }
@@ -256,10 +272,18 @@ Response:
 ### Fetch results
 
 ```bash
-curl http://localhost:8000/results/e5f6g7h8-...
+curl https://research-workflow-agent-production.up.railway.app/results/e5f6g7h8-...
 ```
 
 Returns structured JSON with `summary`, `concepts`, `quiz`, `flashcards`, and `mindmap` sections.
+
+### Local development
+
+Replace the base URL with `http://localhost:8000` when running the API locally:
+
+```bash
+curl http://localhost:8000/health
+```
 
 | Method | Path | Description |
 |--------|------|-------------|
@@ -338,6 +362,15 @@ On every push/PR to `main`, the [CI workflow](.github/workflows/ci.yml) runs:
 
 ## Deployment
 
+### Production (live)
+
+| Component | Platform | URL |
+|-----------|----------|-----|
+| **API** | [Railway](https://railway.app) | https://research-workflow-agent-production.up.railway.app |
+| **UI** | [Streamlit Community Cloud](https://share.streamlit.io) | https://research-workflow-agent-giekafxwvrbkmzllhjlnt2.streamlit.app |
+
+**Repository:** [github.com/Ricardo-Bortolotti/research-workflow-agent](https://github.com/Ricardo-Bortolotti/research-workflow-agent)
+
 ### FastAPI on Railway
 
 1. Connect the GitHub repo to [Railway](https://railway.app).
@@ -349,18 +382,22 @@ On every push/PR to `main`, the [CI workflow](.github/workflows/ci.yml) runs:
 4. Mount a volume at `/app/data` to persist uploads and results.
 5. Health check path: `/health`
 
+**Live API:** https://research-workflow-agent-production.up.railway.app/docs
+
 ### Streamlit on Streamlit Community Cloud
 
 1. Deploy at [share.streamlit.io](https://share.streamlit.io).
 2. Main file: `ui/streamlit_app.py`
-3. **Dependencies:** keep `pyproject.toml` + `uv.lock` at the repo root. Streamlit Cloud detects `uv.lock` and runs `uv sync`. Streamlit itself is pre-installed on the platform; `httpx` and `python-dotenv` come from the main project dependencies.
+3. **Dependencies:** keep `pyproject.toml` + `uv.lock` at the repo root. Streamlit Cloud detects `uv.lock` and runs `uv sync`. Streamlit is pre-installed on the platform; `httpx` and `python-dotenv` come from the main project dependencies.
 4. In **Secrets**:
 
    ```toml
-   API_URL = "https://your-railway-api.up.railway.app"
+   API_URL = "https://research-workflow-agent-production.up.railway.app"
    ```
 
 The UI only calls the API — no HF token is needed in Streamlit secrets.
+
+**Live app:** https://research-workflow-agent-giekafxwvrbkmzllhjlnt2.streamlit.app
 
 ---
 
@@ -389,9 +426,18 @@ Interactive walkthroughs under `notebooks/`:
 | `HF_MODEL_ID` | No | Chat model (default: `meta-llama/Llama-3.1-8B-Instruct`) |
 | `HF_EMBEDDING_MODEL_ID` | No | Embedding model (default: `BAAI/bge-small-en-v1.5`) |
 | `HF_INFERENCE_PROVIDER` | No | Force provider suffix (e.g. `groq`) |
-| `API_URL` | No | Streamlit → API URL (default: `http://localhost:8000`) |
+| `API_URL` | No | Streamlit → API URL (production: `https://research-workflow-agent-production.up.railway.app`) |
 
 See [`.env.example`](.env.example) for a full template.
+
+---
+
+## Author
+
+Developed by **Ricardo Bortolotti**
+
+- [LinkedIn](https://www.linkedin.com/in/ricardo-bortolotti)
+- [GitHub](https://github.com/Ricardo-Bortolotti)
 
 ---
 
