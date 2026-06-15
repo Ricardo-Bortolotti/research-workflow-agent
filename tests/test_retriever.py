@@ -5,7 +5,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 from langchain_core.documents import Document
 
-from rag.embeddings import ChunkEmbedder  # Import for patching
 from rag.retriever import DEFAULT_TOP_K, DocumentRetriever, RetrieverError
 
 
