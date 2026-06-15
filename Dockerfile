@@ -30,8 +30,11 @@ COPY ui/ ui/
 
 RUN uv sync --frozen --no-dev
 
-# Pre-download embedding model so first analysis is faster in containers
-RUN uv run python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('BAAI/bge-small-en-v1.5')"
+# Optional: skip in CI for faster Docker build validation
+ARG PRELOAD_EMBEDDINGS=true
+RUN if [ "$PRELOAD_EMBEDDINGS" = "true" ]; then \
+        uv run python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('BAAI/bge-small-en-v1.5')"; \
+    fi
 
 EXPOSE 8000 8501
 

@@ -97,7 +97,9 @@ def test_run_workflow_calls_agents_in_order(
     mock_agents.mindmap.run.assert_called_with("Review Transformer", context_documents)
 
 
-def test_run_workflow_requires_question(mock_agents: WorkflowAgents, context_documents: list[Document]) -> None:
+def test_run_workflow_requires_question(
+    mock_agents: WorkflowAgents, context_documents: list[Document]
+) -> None:
     with pytest.raises(WorkflowError, match="Question text cannot be empty"):
         run_workflow("  ", context_documents, agents=mock_agents)
 

@@ -6,7 +6,12 @@ from unittest.mock import MagicMock
 import pytest
 from langchain_core.documents import Document
 
-from agents.flashcard_agent import FlashcardAgent, FlashcardAgentError, FlashcardItem, FlashcardResult
+from agents.flashcard_agent import (
+    FlashcardAgent,
+    FlashcardAgentError,
+    FlashcardItem,
+    FlashcardResult,
+)
 
 
 @pytest.fixture
@@ -15,7 +20,10 @@ def mock_llm() -> MagicMock:
     llm.generate.return_value = json.dumps(
         {
             "flashcards": [
-                {"front": "What is self-attention?", "back": "A mechanism relating sequence positions."},
+                {
+                    "front": "What is self-attention?",
+                    "back": "A mechanism relating sequence positions.",
+                },
                 {"front": "Multi-head attention", "back": "Parallel attention over subspaces."},
             ]
         }

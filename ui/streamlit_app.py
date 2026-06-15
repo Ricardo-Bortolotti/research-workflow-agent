@@ -43,7 +43,9 @@ if analyze_clicked and uploaded_file is not None:
 
                 upload_response = client.post(
                     "/upload",
-                    files={"file": (uploaded_file.name, uploaded_file.getvalue(), "application/pdf")},
+                    files={
+                        "file": (uploaded_file.name, uploaded_file.getvalue(), "application/pdf")
+                    },
                 )
                 upload_response.raise_for_status()
                 upload_data = upload_response.json()

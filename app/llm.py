@@ -129,9 +129,7 @@ def _resolve_api_token() -> str:
             return token
 
     joined_vars = " or ".join(TOKEN_ENV_VARS)
-    raise LLMError(
-        f"Missing Hugging Face API token. Set {joined_vars} in your .env file."
-    )
+    raise LLMError(f"Missing Hugging Face API token. Set {joined_vars} in your .env file.")
 
 
 def _extract_message_content(response: Any) -> str:

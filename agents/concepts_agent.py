@@ -148,7 +148,11 @@ def _parse_concept_response(text: str) -> ConceptResult:
 
 
 def _parse_concept_item(item: dict[str, Any], index: int) -> ConceptItem:
-    missing = [field for field in ("concept", "definition", "relevance") if not str(item.get(field, "")).strip()]
+    missing = [
+        field
+        for field in ("concept", "definition", "relevance")
+        if not str(item.get(field, "")).strip()
+    ]
     if missing:
         raise ConceptAgentError(
             f"Concept at index {index} is missing required fields: {', '.join(missing)}"

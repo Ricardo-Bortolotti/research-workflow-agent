@@ -40,6 +40,13 @@ def test_split_documents_empty_input() -> None:
     assert split_documents([]) == []
 
 
+def test_split_documents_short_text_returns_single_chunk() -> None:
+    documents = [Document(page_content="Short text.", metadata={"page": 0})]
+    chunks = split_documents(documents, chunk_size=1000, chunk_overlap=50)
+    assert len(chunks) == 1
+    assert chunks[0].page_content == "Short text."
+
+
 def test_split_documents_uses_defaults() -> None:
     splitter = create_text_splitter()
     assert splitter._chunk_size == DEFAULT_CHUNK_SIZE

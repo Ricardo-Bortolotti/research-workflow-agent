@@ -4,7 +4,7 @@ import json
 import logging
 import re
 from collections.abc import Sequence
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from typing import Any
 
 from langchain_core.documents import Document
@@ -18,7 +18,8 @@ SYSTEM_PROMPT = (
     "Return valid JSON only, with no markdown fences or extra commentary."
 )
 
-MINDMAP_PROMPT_TEMPLATE = """Transform the key concepts from the context below into a hierarchical mind map.
+MINDMAP_PROMPT_TEMPLATE = """Transform the key concepts from the context below into a \
+hierarchical mind map.
 
 Topic focus:
 {question}
@@ -178,7 +179,9 @@ def _parse_mindmap_node(item: dict[str, Any], index: int) -> MindMapNode:
     if not isinstance(children_raw, list):
         raise MindMapAgentError(f"Node at index {index} must have a 'children' array")
 
-    children = [_parse_mindmap_node(child, child_index) for child_index, child in enumerate(children_raw)]
+    children = [
+        _parse_mindmap_node(child, child_index) for child_index, child in enumerate(children_raw)
+    ]
     return MindMapNode(label=label, children=children)
 
 

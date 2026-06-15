@@ -57,3 +57,22 @@ def test_load_pdf_parser_failure(tmp_path: Path) -> None:
         mock_loader_cls.return_value.load.side_effect = RuntimeError("invalid pdf structure")
         with pytest.raises(PDFLoadError, match="Failed to parse PDF"):
             load_pdf(pdf_path)
+
+
+def test_load_pdf_rejects_directory(tmp_path: Path) -> None:
+    directory = tmp_path / "not_a_file"
+    directory.mkdir()
+    with pytest.raises(PDFLoadError, match="not a file"):
+        load_pdf(directory)
+
+
+def test_load_pdf_accepts_string_path(tmp_path: Path) -> None:
+    pdf_path = tmp_path / "sample.pdf"
+    pdf_path.write_bytes(b"%PDF-1.4 fake")
+    mock_documents = [Document(page_content="Page 1", metadata={"page": 0})]
+
+    with patch("rag.loaders.PyPDFLoader") as mock_loader_cls:
+        mock_loader_cls.return_value.load.return_value = mock_documents
+        result = load_pdf(str(pdf_path))
+
+    assert len(result) == 1

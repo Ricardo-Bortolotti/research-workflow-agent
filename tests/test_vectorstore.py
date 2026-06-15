@@ -1,6 +1,7 @@
 """Tests for ChromaDB vector store."""
 
 from pathlib import Path
+
 import pytest
 from langchain_core.documents import Document
 
@@ -36,7 +37,9 @@ def test_create_collection(store: ChromaVectorStore) -> None:
 def test_add_documents_indexes_chunks(store: ChromaVectorStore) -> None:
     chunks = [
         Document(page_content="attention mechanism", metadata={"page": 0, "source": "paper.pdf"}),
-        Document(page_content="transformer architecture", metadata={"page": 1, "source": "paper.pdf"}),
+        Document(
+            page_content="transformer architecture", metadata={"page": 1, "source": "paper.pdf"}
+        ),
     ]
     embeddings = [
         [1.0, 0.0, 0.0],

@@ -77,7 +77,9 @@ class ChromaVectorStore:
     def _get_client(self) -> chromadb.PersistentClient:
         if self._client is None:
             self.persist_directory.mkdir(parents=True, exist_ok=True)
-            logger.info("Opening ChromaDB persistent client at: %s", self.persist_directory.resolve())
+            logger.info(
+                "Opening ChromaDB persistent client at: %s", self.persist_directory.resolve()
+            )
             try:
                 self._client = chromadb.PersistentClient(path=str(self.persist_directory))
             except Exception as exc:

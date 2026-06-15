@@ -1,6 +1,5 @@
 """Tests for the FastAPI analysis endpoints."""
 
-from io import BytesIO
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -98,9 +97,7 @@ def test_analyze_and_get_results(
                 }
             ]
         },
-        "flashcards": {
-            "flashcards": [{"front": "Attention", "back": "Mechanism."}]
-        },
+        "flashcards": {"flashcards": [{"front": "Attention", "back": "Mechanism."}]},
         "mindmap": {
             "title": "Main Topic",
             "nodes": [{"label": "Attention", "children": []}],

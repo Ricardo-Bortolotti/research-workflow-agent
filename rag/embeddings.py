@@ -70,7 +70,9 @@ class ChunkEmbedder:
 
         return np.asarray(vectors).tolist()
 
-    def embed_chunks(self, chunks: Sequence[Document], *, normalize: bool = True) -> list[list[float]]:
+    def embed_chunks(
+        self, chunks: Sequence[Document], *, normalize: bool = True
+    ) -> list[list[float]]:
         """Embed LangChain Document chunks using their page_content.
 
         Args:

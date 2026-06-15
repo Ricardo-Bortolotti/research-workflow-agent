@@ -77,3 +77,12 @@ def test_invalid_top_k_on_init(mock_vector_store: MagicMock) -> None:
 def test_invalid_top_k_on_invoke(retriever: DocumentRetriever) -> None:
     with pytest.raises(RetrieverError, match="top_k must be positive"):
         retriever.invoke("valid query", top_k=-1)
+
+
+def test_invoke_wraps_unexpected_errors(
+    retriever: DocumentRetriever,
+    mock_embedder: MagicMock,
+) -> None:
+    mock_embedder.embed_query.side_effect = RuntimeError("embedding service down")
+    with pytest.raises(RetrieverError, match="Retrieval failed"):
+        retriever.invoke("valid query")
