@@ -8,13 +8,14 @@ from dotenv import load_dotenv
 from huggingface_hub import InferenceClient
 from huggingface_hub.errors import BadRequestError, HfHubHTTPError
 
+from app.hf_auth import resolve_hf_api_token
+
 load_dotenv()
 
 logger = logging.getLogger(__name__)
 
 # Widely available on HF Inference Providers router (chat completion).
 DEFAULT_MODEL_ID = "meta-llama/Llama-3.1-8B-Instruct"
-TOKEN_ENV_VARS = ("HUGGINGFACE_API_TOKEN", "HF_TOKEN")
 MODEL_ENV_VAR = "HF_MODEL_ID"
 PROVIDER_ENV_VAR = "HF_INFERENCE_PROVIDER"
 
@@ -123,13 +124,10 @@ def _format_bad_request_error(exc: BadRequestError, model_id: str) -> str:
 
 
 def _resolve_api_token() -> str:
-    for env_var in TOKEN_ENV_VARS:
-        token = os.getenv(env_var)
-        if token:
-            return token
-
-    joined_vars = " or ".join(TOKEN_ENV_VARS)
-    raise LLMError(f"Missing Hugging Face API token. Set {joined_vars} in your .env file.")
+    try:
+        return resolve_hf_api_token()
+    except ValueError as exc:
+        raise LLMError(str(exc)) from exc
 
 
 def _extract_message_content(response: Any) -> str:

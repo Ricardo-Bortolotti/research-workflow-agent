@@ -127,8 +127,8 @@ print(result["mindmap"].to_text())
 |-------|------------|
 | **Language** | Python 3.11 |
 | **Package manager** | [uv](https://github.com/astral-sh/uv) |
-| **RAG** | LangChain, ChromaDB, sentence-transformers |
-| **Embeddings** | `BAAI/bge-small-en-v1.5` |
+| **RAG** | LangChain, ChromaDB |
+| **Embeddings** | Hugging Face Inference API (`BAAI/bge-small-en-v1.5` default) |
 | **Orchestration** | LangGraph |
 | **LLM** | Hugging Face Inference API (`meta-llama/Llama-3.1-8B-Instruct` default) |
 | **API** | FastAPI + Uvicorn |
@@ -152,8 +152,9 @@ book-research-agent/
 ├── tests/            # pytest unit & integration tests
 ├── notebooks/        # Interactive exploration notebooks
 ├── scripts/          # Manual test utilities
-├── Dockerfile
-├── docker-compose.yml
+├── Dockerfile          # Slim API image (Railway / production)
+├── Dockerfile.ui       # Lightweight Streamlit image
+├── requirements-ui.txt  # Streamlit Cloud dependencies
 └── pyproject.toml
 ```
 
@@ -281,10 +282,12 @@ Stop: `docker compose down` · Reset volumes: `docker compose down -v`
 
 | Design choice | Rationale |
 |---------------|-----------|
-| Single Dockerfile | Same image for API and UI; Railway reuses it for API-only deploy |
-| `uv sync --frozen` | Reproducible installs from `uv.lock` |
-| Optional `PRELOAD_EMBEDDINGS` build arg | Pre-download BGE model in prod; skip in CI for faster builds |
-| Named volumes (`app_data`, `model_cache`) | Persist uploads, ChromaDB, and HF caches |
+| **Separate Docker images** | API ships RAG + agents; UI is a thin HTTP client (~no ML stack) |
+| `Dockerfile` (API) | No Streamlit, no PyTorch — smaller image and lower RAM on Railway |
+| `Dockerfile.ui` | Only `streamlit`, `httpx`, `python-dotenv` via `requirements-ui.txt` |
+| `uv sync --frozen` | Reproducible API installs from `uv.lock` |
+| HF API for embeddings | Same token as LLM; avoids loading PyTorch in the container |
+| Named volume (`app_data`) | Persist uploads, ChromaDB, and results |
 | `API_URL=http://api:8000` in compose | UI container reaches API over Docker network |
 
 ---
@@ -322,7 +325,7 @@ On every push/PR to `main`, the [CI workflow](.github/workflows/ci.yml) runs:
 
 1. **Lint** — Ruff check + format
 2. **Test** — `pytest` (108 tests)
-3. **Docker build** — `docker build` with `PRELOAD_EMBEDDINGS=false`
+3. **Docker build** — API (`Dockerfile`) and UI (`Dockerfile.ui`) images
 
 ---
 
@@ -334,7 +337,8 @@ On every push/PR to `main`, the [CI workflow](.github/workflows/ci.yml) runs:
 2. Railway detects the `Dockerfile` (default CMD runs uvicorn on `$PORT`).
 3. Set environment variables:
    - `HUGGINGFACE_API_TOKEN`
-   - `HF_MODEL_ID` (optional)
+   - `HF_MODEL_ID` (optional, chat model)
+   - `HF_EMBEDDING_MODEL_ID` (optional, default `BAAI/bge-small-en-v1.5`)
 4. Mount a volume at `/app/data` to persist uploads and results.
 5. Health check path: `/health`
 
@@ -342,7 +346,8 @@ On every push/PR to `main`, the [CI workflow](.github/workflows/ci.yml) runs:
 
 1. Deploy at [share.streamlit.io](https://share.streamlit.io).
 2. Main file: `ui/streamlit_app.py`
-3. In **Secrets**:
+3. Dependencies: use `requirements-ui.txt` (or set it as the requirements file in app settings)
+4. In **Secrets**:
 
    ```toml
    API_URL = "https://your-railway-api.up.railway.app"
@@ -373,8 +378,9 @@ Interactive walkthroughs under `notebooks/`:
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `HUGGINGFACE_API_TOKEN` | Yes | HF token for Inference API |
-| `HF_MODEL_ID` | No | Model ID (default: `meta-llama/Llama-3.1-8B-Instruct`) |
+| `HUGGINGFACE_API_TOKEN` | Yes | HF token for LLM + embedding inference |
+| `HF_MODEL_ID` | No | Chat model (default: `meta-llama/Llama-3.1-8B-Instruct`) |
+| `HF_EMBEDDING_MODEL_ID` | No | Embedding model (default: `BAAI/bge-small-en-v1.5`) |
 | `HF_INFERENCE_PROVIDER` | No | Force provider suffix (e.g. `groq`) |
 | `API_URL` | No | Streamlit → API URL (default: `http://localhost:8000`) |
 
